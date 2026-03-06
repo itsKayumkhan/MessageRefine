@@ -1,0 +1,61 @@
+{
+  "agents": {
+    "architect": {
+      "agentId": "architect",
+      "agentType": "orchestrator",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-06T16:51:04.763Z",
+      "domain": "chrome-extension-architecture",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "ui-engineer": {
+      "agentId": "ui-engineer",
+      "agentType": "specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-06T16:51:04.802Z",
+      "domain": "frontend-ui-ux",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "api-integrator": {
+      "agentId": "api-integrator",
+      "agentType": "specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-06T16:51:04.829Z",
+      "domain": "api-integration",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "qa-tester": {
+      "agentId": "qa-tester",
+      "agentType": "specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "opus"
+      },
+      "createdAt": "2026-03-06T16:51:04.854Z",
+      "domain": "quality-assurance",
+      "model": "opus",
+      "modelRoutedBy": "explicit"
+    }
+  },
+  "version": "3.0.0"
+}

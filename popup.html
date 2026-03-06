@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MessageRefine</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════ HEADER ══════════════════════════════ -->
+  <header>
+    <div class="logo-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+      </svg>
+    </div>
+    <div class="header-content">
+      <div class="header-top-row">
+        <h1 class="header-title">MessageRefine</h1>
+        <span class="ai-badge">AI</span>
+      </div>
+      <p class="header-subtitle">Smart Client Communication</p>
+    </div>
+    <button id="settings-toggle-btn" class="settings-btn" title="Settings">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- ══════════════════════════ SETTINGS PANEL ══════════════════════════ -->
+  <section id="settings-panel" class="hidden section-fade">
+    <p class="settings-title">API Configuration</p>
+
+    <div class="form-group">
+      <label class="ai-label">Active Provider</label>
+      <div class="provider-row">
+        <button data-provider="openai" class="provider-btn">OpenAI</button>
+        <button data-provider="gemini" class="provider-btn">Gemini</button>
+        <button data-provider="claude" class="provider-btn">Claude</button>
+        <button data-provider="groq"   class="provider-btn">Groq</button>
+        <button data-provider="hf"     class="provider-btn">HF</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="openai-key-input" class="ai-label">OpenAI API Key</label>
+      <input id="openai-key-input" type="password" placeholder="sk-..." class="ai-input" />
+    </div>
+
+    <div class="form-group">
+      <label for="gemini-key-input" class="ai-label">Gemini API Key</label>
+      <input id="gemini-key-input" type="password" placeholder="AIza..." class="ai-input" />
+    </div>
+
+    <div class="form-group">
+      <label for="claude-key-input" class="ai-label">Claude API Key</label>
+      <input id="claude-key-input" type="password" placeholder="sk-ant-..." class="ai-input" />
+    </div>
+
+    <div class="form-group">
+      <label for="groq-key-input" class="ai-label">Groq API Key</label>
+      <input id="groq-key-input" type="password" placeholder="gsk_..." class="ai-input" />
+    </div>
+
+    <div class="form-group">
+      <label for="hf-key-input" class="ai-label">HuggingFace Token</label>
+      <input id="hf-key-input" type="password" placeholder="hf_..." class="ai-input" />
+    </div>
+
+    <div class="form-group-last">
+      <label for="model-select" class="ai-label">Model</label>
+      <select id="model-select" class="ai-input"></select>
+    </div>
+
+    <div class="settings-actions">
+      <button id="save-settings-btn" class="btn-save">Save Settings</button>
+      <button id="clear-key-btn" class="btn-danger">Clear All</button>
+    </div>
+
+    <p id="settings-status" class="hidden"></p>
+  </section>
+
+  <!-- ════════════════════════════ NO-KEY SCREEN ════════════════════════ -->
+  <section id="no-key-screen" class="hidden section-fade">
+    <div class="no-key-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#818cf8" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+      </svg>
+    </div>
+    <h2 class="no-key-title">API Key Required</h2>
+    <p class="no-key-desc">Click the settings icon to add your API key<br>and get started with AI-powered messaging.</p>
+    <button id="no-key-open-settings-btn" class="btn-open-settings">Open Settings</button>
+  </section>
+
+  <!-- ══════════════════════════════ MAIN APP ═══════════════════════════ -->
+  <div id="main-app" class="hidden section-fade">
+
+    <!-- Tabs -->
+    <div class="tabs-bar">
+      <button id="tab-reply"   class="tab-btn tab-active">⚡ Smart Reply</button>
+      <button id="tab-enhance" class="tab-btn tab-inactive">✨ Enhancer</button>
+    </div>
+
+    <!-- ───────────── TOOL 1: SMART REPLY ───────────── -->
+    <div id="panel-reply" class="panel-body">
+
+      <div>
+        <div class="label-row">
+          <label for="client-message" class="ai-label">Client's Message <span style="color:#f87171;">*</span></label>
+          <button type="button" id="clear-client-message" class="field-clear-btn" title="Clear">&#x2715;</button>
+        </div>
+        <textarea id="client-message" rows="4"
+          placeholder="Paste the client's message here..."
+          class="ai-input"></textarea>
+        <span class="word-counter" id="counter-client-message">0 / 150 words</span>
+      </div>
+
+      <div>
+        <div class="label-row">
+          <label for="reply-context" class="ai-label">Context / Key Points</label>
+          <button type="button" id="clear-reply-context" class="field-clear-btn" title="Clear">&#x2715;</button>
+        </div>
+        <input id="reply-context" type="text"
+          placeholder="e.g. Offer 10% discount, delivery by Friday..."
+          class="ai-input" />
+        <span class="word-counter" id="counter-reply-context">0 / 40 words</span>
+      </div>
+
+      <div class="length-row">
+        <span class="ai-label" style="margin-bottom:0;">Output Length</span>
+        <div class="length-btns" id="reply-length-btns">
+          <button type="button" class="length-btn" data-tokens="30">V.Short</button>
+          <button type="button" class="length-btn" data-tokens="120">Short</button>
+          <button type="button" class="length-btn length-active" data-tokens="250">Medium</button>
+          <button type="button" class="length-btn" data-tokens="450">Long</button>
+        </div>
+      </div>
+
+      <button id="generate-reply-btn" class="btn-generate btn-reply">
+        <span id="reply-spinner" class="spinner hidden"></span>
+        <svg id="reply-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+        <span id="generate-reply-label">Generate Reply</span>
+      </button>
+
+      <div id="reply-output-wrap" class="hidden section-fade">
+        <div class="output-header">
+          <span class="output-label">Generated Reply</span>
+          <button id="copy-reply-btn" class="copy-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div id="reply-output" class="output-box"></div>
+      </div>
+
+      <div id="reply-error" class="hidden error-box"></div>
+    </div>
+
+    <!-- ───────────── TOOL 2: MESSAGE ENHANCER ───────────── -->
+    <div id="panel-enhance" class="hidden panel-body">
+
+      <div>
+        <div class="label-row">
+          <label for="rough-draft" class="ai-label">Rough Draft <span style="color:#f87171;">*</span></label>
+          <button type="button" id="clear-rough-draft" class="field-clear-btn" title="Clear">&#x2715;</button>
+        </div>
+        <textarea id="rough-draft" rows="4"
+          placeholder="Type your rough draft here..."
+          class="ai-input"></textarea>
+        <span class="word-counter" id="counter-rough-draft">0 / 150 words</span>
+      </div>
+
+      <div>
+        <label for="tone-select" class="ai-label">Tone</label>
+        <select id="tone-select" class="ai-input">
+          <option value="Professional">Professional</option>
+          <option value="Friendly">Friendly</option>
+          <option value="Firm">Firm</option>
+          <option value="Apologetic">Apologetic</option>
+          <option value="Persuasive">Persuasive</option>
+          <option value="Urgent">Urgent</option>
+        </select>
+      </div>
+
+      <div class="length-row">
+        <span class="ai-label" style="margin-bottom:0;">Output Length</span>
+        <div class="length-btns" id="enhance-length-btns">
+          <button type="button" class="length-btn" data-tokens="30">V.Short</button>
+          <button type="button" class="length-btn" data-tokens="120">Short</button>
+          <button type="button" class="length-btn length-active" data-tokens="250">Medium</button>
+          <button type="button" class="length-btn" data-tokens="450">Long</button>
+        </div>
+      </div>
+
+      <button id="enhance-btn" class="btn-generate btn-enhance">
+        <span id="enhance-spinner" class="spinner hidden"></span>
+        <svg id="enhance-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+        </svg>
+        <span id="enhance-label">Enhance Message</span>
+      </button>
+
+      <div id="enhance-output-wrap" class="hidden section-fade">
+        <div class="output-header">
+          <span class="output-label">Enhanced Message</span>
+          <button id="copy-enhance-btn" class="copy-btn copy-btn-violet">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div id="enhance-output" class="output-box"></div>
+      </div>
+
+      <div id="enhance-error" class="hidden error-box"></div>
+    </div>
+
+  </div><!-- /#main-app -->
+
+  <!-- ══════════════════════════════ FOOTER ══════════════════════════════ -->
+  <footer>
+    <p class="footer-text">✨ Made with Love by kayum khan sayal 💚</p>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>

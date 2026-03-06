@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude-flow__swarm_init",
+      "mcp__claude-flow__agent_spawn",
+      "mcp__claude-flow__task_create",
+      "mcp__claude-flow__task_complete"
+    ]
+  }
+}
