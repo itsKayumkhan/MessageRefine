@@ -335,7 +335,7 @@ async function callOpenAI(apiKey, model, systemPrompt, userContent, maxTokens) {
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: userContent  },
       ],
-      temperature: 0.7,
+      temperature: 0.6,
       max_tokens:  maxTokens,
     }),
   });
@@ -353,7 +353,7 @@ async function callGemini(apiKey, model, systemPrompt, userContent, maxTokens) {
     body: JSON.stringify({
       system_instruction: { parts: [{ text: systemPrompt }] },
       contents: [{ role: 'user', parts: [{ text: userContent }] }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens },
+      generationConfig: { temperature: 0.6, maxOutputTokens: maxTokens },
     }),
   });
   await assertOk(res, 'Gemini');
@@ -375,7 +375,7 @@ async function callGroq(apiKey, model, systemPrompt, userContent, maxTokens) {
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: userContent  },
       ],
-      temperature: 0.7,
+      temperature: 0.6,
       max_tokens:  maxTokens,
     }),
   });
@@ -398,7 +398,7 @@ async function callHuggingFace(apiKey, model, systemPrompt, userContent, maxToke
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: userContent  },
       ],
-      temperature: 0.7,
+      temperature: 0.6,
       max_tokens:  maxTokens,
     }),
   });
@@ -455,9 +455,9 @@ async function handleGenerateReply() {
   els.replyOutputWrap.classList.add('hidden');
 
   const maxWords = Math.round(state.replyTokens * 0.7);
-  const systemPrompt = `You write professional but natural replies for a freelance developer talking to clients. Tone: clear, polite, conversational — not stiff or overly formal. Output the reply text only, no subject line, no labels. Maximum ${maxWords} words.`;
+  const systemPrompt = `Freelance web developer assistant. Write natural, polite replies to client messages — clear and conversational, never stiff or corporate. No subject line, no labels, no explanation. Max ${maxWords} words.`;
 
-  const userContent = `Client message: "${clientMsg}"${userCtx ? `\nKey points: ${userCtx}` : ''}\n\nWrite a professional reply.`;
+  const userContent = `Client: "${clientMsg}"${userCtx ? `\nKey points: ${userCtx}` : ''}`;
 
   try {
     const result = await callLLM(systemPrompt, userContent, state.replyTokens);
@@ -492,9 +492,9 @@ async function handleEnhanceMessage() {
   els.enhanceOutputWrap.classList.add('hidden');
 
   const maxWords = Math.round(state.enhanceTokens * 0.7);
-  const systemPrompt = `You are a professional editor for a freelance developer. Rewrite rough messages into clear, polite, natural-sounding professional messages. Keep the meaning intact. Output rewritten text only — no labels, no explanation. Maximum ${maxWords} words.`;
+  const systemPrompt = `Rewrite rough drafts from a freelance developer into clear, polite, natural professional messages. Keep the full meaning. Output rewritten text only — no labels, no explanation. Max ${maxWords} words.`;
 
-  const userContent = `Rewrite in ${tone} tone:\n"${draft}"`;
+  const userContent = `Tone: ${tone}\nDraft: "${draft}"`;
 
   try {
     const result = await callLLM(systemPrompt, userContent, state.enhanceTokens);
