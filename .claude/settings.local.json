@@ -4,7 +4,8 @@
       "mcp__claude-flow__swarm_init",
       "mcp__claude-flow__agent_spawn",
       "mcp__claude-flow__task_create",
-      "mcp__claude-flow__task_complete"
+      "mcp__claude-flow__task_complete",
+      "Bash(npx javascript-obfuscator popup_source.js -o popup.js --compact true --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --string-array-rotate true --string-array-shuffle true --string-array-calls-transform true --split-strings true --split-strings-chunk-length 5 --identifier-names-generator hexadecimal --rename-globals false --control-flow-flattening true --control-flow-flattening-threshold 0.4 --numbers-to-expressions true --simplify true --transform-object-keys true)"
     ]
   }
 }

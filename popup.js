@@ -58,8 +58,10 @@ const els = {
   // Tabs
   tabReply:             document.getElementById('tab-reply'),
   tabEnhance:           document.getElementById('tab-enhance'),
+  tabEod:               document.getElementById('tab-eod'),
   panelReply:           document.getElementById('panel-reply'),
   panelEnhance:         document.getElementById('panel-enhance'),
+  panelEod:             document.getElementById('panel-eod'),
   // Tool 1 – Smart Reply
   clientMessage:        document.getElementById('client-message'),
   replyContext:         document.getElementById('reply-context'),
@@ -82,6 +84,16 @@ const els = {
   enhanceOutput:        document.getElementById('enhance-output'),
   copyEnhanceBtn:       document.getElementById('copy-enhance-btn'),
   enhanceError:         document.getElementById('enhance-error'),
+  // Tool 3 – EOD Report
+  eodNotes:             document.getElementById('eod-notes'),
+  eodBtn:               document.getElementById('eod-btn'),
+  eodLabel:             document.getElementById('eod-label'),
+  eodIcon:              document.getElementById('eod-icon'),
+  eodSpinner:           document.getElementById('eod-spinner'),
+  eodOutputWrap:        document.getElementById('eod-output-wrap'),
+  eodOutput:            document.getElementById('eod-output'),
+  copyEodBtn:           document.getElementById('copy-eod-btn'),
+  eodError:             document.getElementById('eod-error'),
 };
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -98,7 +110,7 @@ let state = {
 };
 
 // ─── Word limit helpers ───────────────────────────────────────────────────────
-const WORD_LIMITS = { clientMessage: 150, replyContext: 40, roughDraft: 150 };
+const WORD_LIMITS = { clientMessage: 150, replyContext: 40, roughDraft: 150, eodNotes: 200 };
 
 function countWords(text) {
   return text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
@@ -120,7 +132,7 @@ function applyWordLimit(el, counterId, maxWords) {
 }
 
 // ─── Draft persistence ────────────────────────────────────────────────────────
-const DRAFT_KEYS = ['draftClientMessage', 'draftReplyContext', 'draftRoughDraft', 'draftTone'];
+const DRAFT_KEYS = ['draftClientMessage', 'draftReplyContext', 'draftRoughDraft', 'draftTone', 'draftEodNotes'];
 const draftTimers = {};
 
 function saveDraft(key, value) {
@@ -138,10 +150,12 @@ function loadDrafts() {
     if (result.draftReplyContext)  els.replyContext.value  = result.draftReplyContext;
     if (result.draftRoughDraft)    els.roughDraft.value    = result.draftRoughDraft;
     if (result.draftTone)          els.toneSelect.value    = result.draftTone;
+    if (result.draftEodNotes)      els.eodNotes.value      = result.draftEodNotes;
     // Sync counters after restore
     applyWordLimit(els.clientMessage, 'counter-client-message', WORD_LIMITS.clientMessage);
     applyWordLimit(els.replyContext,  'counter-reply-context',  WORD_LIMITS.replyContext);
     applyWordLimit(els.roughDraft,    'counter-rough-draft',    WORD_LIMITS.roughDraft);
+    applyWordLimit(els.eodNotes,      'counter-eod-notes',      WORD_LIMITS.eodNotes);
   });
 }
 
@@ -297,11 +311,12 @@ function showSettingsStatus(msg, type) {
 
 // ─── Tab switching ────────────────────────────────────────────────────────────
 function switchTab(active) {
-  const isReply = active === 'reply';
-  els.tabReply.className   = `tab-btn ${isReply ? 'tab-active' : 'tab-inactive'}`;
-  els.tabEnhance.className = `tab-btn ${!isReply ? 'tab-active' : 'tab-inactive'}`;
-  els.panelReply.classList.toggle('hidden', !isReply);
-  els.panelEnhance.classList.toggle('hidden', isReply);
+  els.tabReply.className   = `tab-btn ${active === 'reply'    ? 'tab-active' : 'tab-inactive'}`;
+  els.tabEnhance.className = `tab-btn ${active === 'enhance'  ? 'tab-active' : 'tab-inactive'}`;
+  els.tabEod.className     = `tab-btn ${active === 'eod'      ? 'tab-active' : 'tab-inactive'}`;
+  els.panelReply.classList.toggle('hidden',   active !== 'reply');
+  els.panelEnhance.classList.toggle('hidden', active !== 'enhance');
+  els.panelEod.classList.toggle('hidden',     active !== 'eod');
 }
 
 // ─── LLM API router ───────────────────────────────────────────────────────────
@@ -455,9 +470,9 @@ async function handleGenerateReply() {
   els.replyOutputWrap.classList.add('hidden');
 
   const maxWords = Math.round(state.replyTokens * 0.7);
-  const systemPrompt = `Freelance web developer assistant. Write natural, polite replies to client messages — clear and conversational, never stiff or corporate. No subject line, no labels, no explanation. Max ${maxWords} words.`;
+  const systemPrompt = `You are a freelance web developer replying to clients. Write short, direct, natural replies in simple professional English. Sound like a real person — not a corporate bot. Never use phrases like "I note that", "It is to inform you", "I hope this message finds you well". No subject line, no labels. Max ${maxWords} words.`;
 
-  const userContent = `Client: "${clientMsg}"${userCtx ? `\nKey points: ${userCtx}` : ''}`;
+  const userContent = `Client message: "${clientMsg}"${userCtx ? `\nContext: ${userCtx}` : ''}\nWrite the reply.`;
 
   try {
     const result = await callLLM(systemPrompt, userContent, state.replyTokens);
@@ -492,9 +507,9 @@ async function handleEnhanceMessage() {
   els.enhanceOutputWrap.classList.add('hidden');
 
   const maxWords = Math.round(state.enhanceTokens * 0.7);
-  const systemPrompt = `Rewrite rough drafts from a freelance developer into clear, polite, natural professional messages. Keep the full meaning. Output rewritten text only — no labels, no explanation. Max ${maxWords} words.`;
+  const systemPrompt = `You are a professional message refiner for a software developer. Your job is to convert rough, broken, or poorly written English messages into clear, professional messages suitable for sending to clients on WhatsApp, Fiverr, or chat platforms. Rules: (1) Keep messages short and natural. (2) Do NOT add unnecessary greetings like "Hi", "Hello", or "Best regards" unless the user explicitly asks for email format. (3) Maintain the original meaning exactly. (4) Fix grammar and clarity but do not change the intent. (5) Prefer simple and confident language. (6) Do not over-explain. (7) Avoid long paragraphs. (8) Assume requests are for client communication in software development projects. (9) Output only the refined message — no labels, no explanation. Max ${maxWords} words.`;
 
-  const userContent = `Tone: ${tone}\nDraft: "${draft}"`;
+  const userContent = `Tone: ${tone}\nMessage: "${draft}"`;
 
   try {
     const result = await callLLM(systemPrompt, userContent, state.enhanceTokens);
@@ -505,6 +520,43 @@ async function handleEnhanceMessage() {
   } finally {
     setEnhanceLoading(false);
   }
+}
+
+// ─── Tool 3: EOD Report ───────────────────────────────────────────────────────
+async function handleGenerateEod() {
+  const notes = els.eodNotes.value.trim();
+
+  if (!notes) {
+    showError(els.eodError, 'Please enter your work notes first.');
+    return;
+  }
+
+  setEodLoading(true);
+  hideError(els.eodError);
+  els.eodOutputWrap.classList.add('hidden');
+
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  const systemPrompt = `You are an assistant that converts raw developer work notes into a clean End Of Day (EOD) report. Rules: (1) Always use this header: "EOD Report - ${today}". (2) Group tasks under the correct client name as "Client: [Name]". (3) Use bullet points with "-" for each task. (4) Fix grammar and spelling but do not change the meaning. (5) Keep tasks short and professional — convert broken sentences into clear action points (e.g. "bug solve" → "Bug fixed", "ui change" → "UI changes implemented"). (6) If multiple clients exist, separate them clearly. (7) Output only the formatted EOD report — no labels, no explanation.`;
+
+  const userContent = `Work notes:\n${notes}`;
+
+  try {
+    const result = await callLLM(systemPrompt, userContent, 450);
+    els.eodOutput.textContent = result;
+    els.eodOutputWrap.classList.remove('hidden');
+  } catch (err) {
+    showError(els.eodError, err.message);
+  } finally {
+    setEodLoading(false);
+  }
+}
+
+function setEodLoading(loading) {
+  els.eodBtn.disabled      = loading;
+  els.eodLabel.textContent = loading ? 'Generating...' : 'Generate EOD Report';
+  els.eodIcon.classList.toggle('hidden', loading);
+  els.eodSpinner.classList.toggle('hidden', !loading);
 }
 
 function setEnhanceLoading(loading) {
@@ -577,10 +629,12 @@ function bindEvents() {
   // Tabs
   els.tabReply.addEventListener('click',   () => switchTab('reply'));
   els.tabEnhance.addEventListener('click', () => switchTab('enhance'));
+  els.tabEod.addEventListener('click',     () => switchTab('eod'));
 
-  // Generate / Enhance
+  // Generate / Enhance / EOD
   els.generateReplyBtn.addEventListener('click', handleGenerateReply);
   els.enhanceBtn.addEventListener('click', handleEnhanceMessage);
+  els.eodBtn.addEventListener('click', handleGenerateEod);
 
   // Enter in context input triggers generation
   els.replyContext.addEventListener('keydown', (e) => {
@@ -593,6 +647,9 @@ function bindEvents() {
   });
   els.copyEnhanceBtn.addEventListener('click', () => {
     copyText(els.enhanceOutput.textContent, els.copyEnhanceBtn);
+  });
+  els.copyEodBtn.addEventListener('click', () => {
+    copyText(els.eodOutput.textContent, els.copyEodBtn);
   });
 
   // Word limits + save drafts on input
@@ -630,4 +687,11 @@ function bindEvents() {
   document.getElementById('clear-client-message').addEventListener('click', () => clearDraft('draftClientMessage', els.clientMessage));
   document.getElementById('clear-reply-context').addEventListener('click',  () => clearDraft('draftReplyContext',  els.replyContext));
   document.getElementById('clear-rough-draft').addEventListener('click',    () => clearDraft('draftRoughDraft',    els.roughDraft));
+  document.getElementById('clear-eod-notes').addEventListener('click',      () => clearDraft('draftEodNotes',      els.eodNotes));
+
+  // EOD notes word limit + draft save
+  els.eodNotes.addEventListener('input', () => {
+    applyWordLimit(els.eodNotes, 'counter-eod-notes', WORD_LIMITS.eodNotes);
+    debouncedSave('draftEodNotes', els.eodNotes.value);
+  });
 }
